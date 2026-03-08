@@ -135,7 +135,35 @@ Deployed to AWS EC2 via GitHub Actions on every push to `main`. The pipeline has
 
 Live demo: **http://18.221.156.118** · Credentials: `admin / Password@123`
 
-```
+## Infrastructure & Production Monitoring
 
----
-```
+### Current Deployment
+
+The application runs on a single AWS EC2 instance (t2.micro) with three Docker containers managed by Docker Compose: a React/nginx frontend on port 80, a FastAPI backend, and PostgreSQL with a persistent named volume.
+
+### Production-Grade Evolution
+
+For a production deployment I would make the following changes:
+
+**Infrastructure**: Move from a single EC2 instance to EKS for container orchestration, enabling horizontal scaling and automatic restarts.
+The database would move to RDS PostgreSQL.
+
+**Networking**: I would place the application behind a load balancer, a CDN for static frontend assets, and restrict EC2/ECS security groups to only accept traffic from the LB.
+
+**Monitoring**: Pipe application logs to SIEM of my choice, whatever is being used in the organization (personally Datadog or Dynatrace). I would use the tool to compile metrics, visualize them, and configure automated alerting, for example through PagerDuty.
+Alerting boilerplate already exists in the scheduler's warning logs.
+
+**Secrets**: Replace environment variable secrets with AWS Secrets Manager.
+
+**CI/CD**: Add staging environment deployment before production, with smoke tests on the staging URL as a pipeline blocking gate.
+Database migrations can run as a separate ECS task before new application versions start.
+
+## AI Assistance
+
+This project was built with assistance from Claude:
+
+- **Architecture & scaffolding**: Architected initial project structure, Docker Compose configuration, Dockerfile setup, and CI/CD pipeline configurations.
+- **Boilerplate generation**: Generated boilerplate for models, router patterns, and React component scaffolding.
+- **Debugging**: Debugging of asyncpg SSL connection failures, bcrypt/passlib compatibility issues, pytest event loop conflicts.
+
+All generated code was reviewed and understood by myself before use, and modified where appropriate. I used AI as a very capable pair programmer and collaborator.
