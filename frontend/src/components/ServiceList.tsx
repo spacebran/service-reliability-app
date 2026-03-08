@@ -14,10 +14,18 @@ const STATUS_STYLES: Record<HealthStatus, string> = {
 
 function StatusBadge({ status }: { status: HealthStatus }) {
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${STATUS_STYLES[status]}`}>
-      <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
-        status === "healthy" ? "bg-green-400" : status === "degraded" ? "bg-yellow-400" : "bg-red-400"
-      }`} />
+    <span
+      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${STATUS_STYLES[status]}`}
+    >
+      <span
+        className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
+          status === "healthy"
+            ? "bg-green-400"
+            : status === "degraded"
+              ? "bg-yellow-400"
+              : "bg-red-400"
+        }`}
+      />
       {status}
     </span>
   );
@@ -34,7 +42,9 @@ const ENV_STYLES: Record<string, string> = {
 function EnvBadge({ env }: { env: string }) {
   const style = ENV_STYLES[env] ?? ENV_STYLES.development;
   return (
-    <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${style}`}>
+    <span
+      className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${style}`}
+    >
       {env}
     </span>
   );
@@ -64,7 +74,9 @@ function EmptyState({ onAdd }: { onAdd: () => void }) {
         <RefreshCw size={24} className="text-slate-500" />
       </div>
       <p className="text-white font-semibold mb-1">No services configured</p>
-      <p className="text-slate-500 text-sm mb-5">Add your first service to start monitoring</p>
+      <p className="text-slate-500 text-sm mb-5">
+        Add your first service to start monitoring
+      </p>
       <button
         onClick={onAdd}
         className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
@@ -95,7 +107,7 @@ function ServiceRow({ service, isSelected, onClick }: ServiceRowProps) {
     <button
       onClick={onClick}
       className={`w-full flex items-center gap-4 px-5 py-3.5 border-b border-slate-800 text-left
-        hover:bg-slate-800/50 transition-colors group
+        hover:bg-slate-800/50 transition-colors group cursor-pointer
         ${isSelected ? "bg-slate-800/70 border-l-2 border-l-blue-500 pl-[18px]" : ""}
       `}
     >
@@ -127,12 +139,17 @@ function ServiceRow({ service, isSelected, onClick }: ServiceRowProps) {
       <span className="flex-1 min-w-0">
         {check?.actual_version ? (
           <span className="flex items-center gap-1.5">
-            <span className={`text-sm font-mono truncate ${hasDrift ? "text-amber-400" : "text-slate-300"}`}>
+            <span
+              className={`text-sm font-mono truncate ${hasDrift ? "text-amber-400" : "text-slate-300"}`}
+            >
               {check.actual_version}
             </span>
             {hasDrift && (
               <span title={`Expected: ${service.expected_version}`}>
-                <AlertTriangle size={13} className="text-amber-400 flex-shrink-0" />
+                <AlertTriangle
+                  size={13}
+                  className="text-amber-400 flex-shrink-0"
+                />
               </span>
             )}
           </span>
@@ -162,7 +179,11 @@ interface ServiceListProps {
   onAdd: () => void;
 }
 
-export default function ServiceList({ selectedId, onSelect, onAdd }: ServiceListProps) {
+export default function ServiceList({
+  selectedId,
+  onSelect,
+  onAdd,
+}: ServiceListProps) {
   const { data: services, isLoading } = useQuery({
     queryKey: ["services"],
     queryFn: getServices,
@@ -186,12 +207,24 @@ export default function ServiceList({ selectedId, onSelect, onAdd }: ServiceList
       {/* Column headers */}
       {!isLoading && (services?.length ?? 0) > 0 && (
         <div className="flex items-center gap-4 px-5 py-2 border-b border-slate-800">
-          <span className="text-xs text-slate-500 uppercase tracking-wider w-44 flex-shrink-0">Name</span>
-          <span className="text-xs text-slate-500 uppercase tracking-wider w-28 flex-shrink-0">Environment</span>
-          <span className="text-xs text-slate-500 uppercase tracking-wider w-24 flex-shrink-0">Status</span>
-          <span className="text-xs text-slate-500 uppercase tracking-wider w-20 flex-shrink-0">Latency</span>
-          <span className="text-xs text-slate-500 uppercase tracking-wider flex-1">Version</span>
-          <span className="text-xs text-slate-500 uppercase tracking-wider w-24 text-right">Last checked</span>
+          <span className="text-xs text-slate-500 uppercase tracking-wider w-44 flex-shrink-0">
+            Name
+          </span>
+          <span className="text-xs text-slate-500 uppercase tracking-wider w-28 flex-shrink-0">
+            Environment
+          </span>
+          <span className="text-xs text-slate-500 uppercase tracking-wider w-24 flex-shrink-0">
+            Status
+          </span>
+          <span className="text-xs text-slate-500 uppercase tracking-wider w-20 flex-shrink-0">
+            Latency
+          </span>
+          <span className="text-xs text-slate-500 uppercase tracking-wider flex-1">
+            Version
+          </span>
+          <span className="text-xs text-slate-500 uppercase tracking-wider w-24 text-right">
+            Last checked
+          </span>
           <span className="w-[15px] flex-shrink-0" />
         </div>
       )}
