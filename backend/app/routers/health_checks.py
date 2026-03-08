@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -7,9 +7,10 @@ from app.models.health_check import HealthCheck, HealthStatus
 from app.models.service import Service
 from app.models.user import User
 from app.routers.auth import get_current_user
+from app.core.config import settings
 
-import os
 import httpx
+import re
 from datetime import datetime, timezone, timedelta
 
 router = APIRouter()
@@ -99,13 +100,13 @@ Here are the non-healthy service checks from the last 24 hours:
 
 Write a concise 2-3 sentence incident summary for a dashboard. 
 Mention which services were affected, the nature of the issues, and any patterns.
-Be factual and professional. Do not use bullet points."""
+Be factual and professional. Do not use bullet points. Do not include a title or label at the start. Begin directly with the summary."""
 
     async with httpx.AsyncClient() as client:
         response = await client.post(
             "https://api.anthropic.com/v1/messages",
             headers={
-                "x-api-key": os.environ.get("ANTHROPIC_API_KEY", ""),
+                "x-api-key": settings.ANTHROPIC_API_KEY,
                 "anthropic-version": "2023-06-01",
                 "content-type": "application/json",
             },
@@ -117,6 +118,10 @@ Be factual and professional. Do not use bullet points."""
             timeout=30.0,
         )
         data = response.json()
+
+        if "content" not in data:
+            raise HTTPException(status_code=500, detail=f"Anthropic API error: {data}")
+
         summary = data["content"][0]["text"]
 
     return {"summary": summary}
