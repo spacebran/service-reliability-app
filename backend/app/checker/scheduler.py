@@ -75,10 +75,13 @@ async def check_service(service_id: int) -> None:
         logger.info("Checked %s → %s (%sms)", service.name, status.value, latency_ms)
 
 
-def _schedule_service(service: Service) -> None:
+def schedule_service(service: Service) -> None:
+    """Add or replace a polling job for a single service on the running scheduler."""
     job_id = f"service_{service.id}"
     if scheduler.get_job(job_id):
         scheduler.remove_job(job_id)
+    if not service.is_active:
+        return
     scheduler.add_job(
         check_service,
         trigger="interval",
@@ -125,7 +128,7 @@ async def start_scheduler() -> None:
         services = result.scalars().all()
 
     for service in services:
-        _schedule_service(service)
+        schedule_service(service)
 
     scheduler.start()
     logger.info("Scheduler started with %d service(s)", len(services))

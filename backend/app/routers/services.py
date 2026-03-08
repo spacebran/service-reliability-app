@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.checker.scheduler import schedule_service
 from app.database import get_db
 from app.models.health_check import HealthCheck
 from app.models.service import Service
@@ -55,6 +56,8 @@ async def create_service(
     db.add(service)
     await db.commit()
     await db.refresh(service)
+    if service.is_active:
+        schedule_service(service)
     return ServiceResponse.model_validate(service)
 
 
