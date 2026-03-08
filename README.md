@@ -127,4 +127,15 @@ uv run pytest tests/ -v
 
 ## Deployment
 
+Deployed to AWS EC2 via GitHub Actions on every push to `main`. The pipeline has three stages:
+
+- Runs tests
+- Builds Docker images, pushes to Docker Hub
+- Deploy to EC2 instance via SSH
+
+Live demo: **http://18.221.156.118** · Credentials: `admin / Password@123`
+
+```
+
 ---
+```
