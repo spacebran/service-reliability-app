@@ -7,6 +7,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
@@ -14,7 +15,7 @@ services:
       retries: 5
 
   backend:
-    image: ${REGISTRY:-ghcr.io/your-org/service-reliability-backend}:${IMAGE_TAG:-latest}
+    image: ${DOCKERHUB_USERNAME}/service-reliability-backend:${IMAGE_TAG:-latest}
     environment:
       DATABASE_URL: ${DATABASE_URL}
       SECRET_KEY: ${SECRET_KEY}
@@ -22,13 +23,15 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    restart: unless-stopped
 
   frontend:
-    image: ${REGISTRY:-ghcr.io/your-org/service-reliability-frontend}:${IMAGE_TAG:-latest}
+    image: ${DOCKERHUB_USERNAME}/service-reliability-frontend:${IMAGE_TAG:-latest}
     ports:
       - "80:80"
     depends_on:
       - backend
+    restart: unless-stopped
 
 volumes:
   postgres_data:
