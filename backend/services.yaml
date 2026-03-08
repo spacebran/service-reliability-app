@@ -1,0 +1,16 @@
+services:
+  - name: "HTTPBin"
+    url: "https://httpbin.org/get"
+    expected_version: "1.0.0"
+    environment: "production"
+    check_interval_seconds: 60
+  - name: "JSONPlaceholder"
+    url: "https://jsonplaceholder.typicode.com/posts/1"
+    expected_version: null
+    environment: "production"
+    check_interval_seconds: 60
+  - name: "Public API (Staging)"
+    url: "https://httpbin.org/status/200"
+    expected_version: null
+    environment: "staging"
+    check_interval_seconds: 120
