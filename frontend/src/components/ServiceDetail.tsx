@@ -1,5 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, Clock, Edit2, ExternalLink, RefreshCw, Trash2, X } from "lucide-react";
+import {
+  AlertTriangle,
+  Clock,
+  Edit2,
+  ExternalLink,
+  RefreshCw,
+  Trash2,
+  X,
+} from "lucide-react";
 import { useState } from "react";
 import {
   Line,
@@ -59,8 +67,12 @@ function HistoryRow({ check }: { check: HealthCheck }) {
   return (
     <tr className="border-b border-slate-800 hover:bg-slate-800/40 transition-colors">
       <td className="px-3 py-2.5">
-        <span className={`flex items-center gap-1.5 text-xs font-semibold ${STATUS_TEXT[check.status]}`}>
-          <span className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT[check.status]}`} />
+        <span
+          className={`flex items-center gap-1.5 text-xs font-semibold ${STATUS_TEXT[check.status]}`}
+        >
+          <span
+            className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT[check.status]}`}
+          />
           {check.status}
         </span>
       </td>
@@ -101,7 +113,12 @@ interface Props {
   onClose: () => void;
 }
 
-export default function ServiceDetail({ service, onEdit, onDelete, onClose }: Props) {
+export default function ServiceDetail({
+  service,
+  onEdit,
+  onDelete,
+  onClose,
+}: Props) {
   const queryClient = useQueryClient();
   const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -132,16 +149,18 @@ export default function ServiceDetail({ service, onEdit, onDelete, onClose }: Pr
 
   const check = service.latest_check;
   const hasDrift =
-    check?.actual_version != null &&
     service.expected_version != null &&
-    check.actual_version !== service.expected_version;
+    (check?.actual_version == null ||
+      check.actual_version !== service.expected_version);
 
   return (
     <aside className="w-[440px] flex-shrink-0 flex flex-col border-l border-slate-800 bg-slate-900 overflow-hidden">
       {/* Header */}
       <div className="flex items-start justify-between px-5 py-4 border-b border-slate-800 flex-shrink-0">
         <div className="min-w-0 pr-3">
-          <h2 className="text-sm font-bold text-white truncate">{service.name}</h2>
+          <h2 className="text-sm font-bold text-white truncate">
+            {service.name}
+          </h2>
           <a
             href={service.url}
             target="_blank"
@@ -179,7 +198,9 @@ export default function ServiceDetail({ service, onEdit, onDelete, onClose }: Pr
       {/* Delete confirm bar */}
       {confirmDelete && (
         <div className="flex items-center justify-between px-5 py-3 bg-red-500/10 border-b border-red-500/20 flex-shrink-0">
-          <p className="text-xs text-red-400 font-medium">Delete this service?</p>
+          <p className="text-xs text-red-400 font-medium">
+            Delete this service?
+          </p>
           <div className="flex gap-2">
             <button
               onClick={() => setConfirmDelete(false)}
@@ -213,7 +234,10 @@ export default function ServiceDetail({ service, onEdit, onDelete, onClose }: Pr
                   icon={<Clock size={11} />}
                 />
                 {service.expected_version && (
-                  <MetaItem label="Expected version" value={service.expected_version} />
+                  <MetaItem
+                    label="Expected version"
+                    value={service.expected_version}
+                  />
                 )}
                 {check?.actual_version && (
                   <MetaItem
@@ -226,10 +250,13 @@ export default function ServiceDetail({ service, onEdit, onDelete, onClose }: Pr
 
               {hasDrift && (
                 <div className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 rounded-lg px-3 py-2">
-                  <AlertTriangle size={13} className="text-amber-400 flex-shrink-0" />
+                  <AlertTriangle
+                    size={13}
+                    className="text-amber-400 flex-shrink-0"
+                  />
                   <p className="text-xs text-amber-400">
                     Version drift — expected {service.expected_version}, got{" "}
-                    {check?.actual_version}
+                    {check?.actual_version ?? "null"}
                   </p>
                 </div>
               )}
@@ -239,7 +266,9 @@ export default function ServiceDetail({ service, onEdit, onDelete, onClose }: Pr
                   <span
                     className={`text-xs font-semibold flex items-center gap-1.5 ${STATUS_TEXT[check.status]}`}
                   >
-                    <span className={`w-2 h-2 rounded-full ${STATUS_DOT[check.status]}`} />
+                    <span
+                      className={`w-2 h-2 rounded-full ${STATUS_DOT[check.status]}`}
+                    />
                     {check.status}
                   </span>
                   <span className="text-xs text-slate-500">
@@ -295,10 +324,18 @@ export default function ServiceDetail({ service, onEdit, onDelete, onClose }: Pr
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-slate-800">
-                      <th className="px-3 pb-2 text-xs text-slate-600 text-left font-medium">Status</th>
-                      <th className="px-3 pb-2 text-xs text-slate-600 text-right font-medium">Latency</th>
-                      <th className="px-3 pb-2 text-xs text-slate-600 text-left font-medium">Version</th>
-                      <th className="px-3 pb-2 text-xs text-slate-600 text-right font-medium">When</th>
+                      <th className="px-3 pb-2 text-xs text-slate-600 text-left font-medium">
+                        Status
+                      </th>
+                      <th className="px-3 pb-2 text-xs text-slate-600 text-right font-medium">
+                        Latency
+                      </th>
+                      <th className="px-3 pb-2 text-xs text-slate-600 text-left font-medium">
+                        Version
+                      </th>
+                      <th className="px-3 pb-2 text-xs text-slate-600 text-right font-medium">
+                        When
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -337,7 +374,9 @@ function MetaItem({
   return (
     <div>
       <p className="text-xs text-slate-500 mb-0.5">{label}</p>
-      <p className={`text-sm font-medium flex items-center gap-1 ${warning ? "text-amber-400" : "text-slate-200"}`}>
+      <p
+        className={`text-sm font-medium flex items-center gap-1 ${warning ? "text-amber-400" : "text-slate-200"}`}
+      >
         {icon}
         {value}
       </p>

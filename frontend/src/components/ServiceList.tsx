@@ -99,9 +99,9 @@ interface ServiceRowProps {
 function ServiceRow({ service, isSelected, onClick }: ServiceRowProps) {
   const check = service.latest_check;
   const hasDrift =
-    check?.actual_version != null &&
     service.expected_version != null &&
-    check.actual_version !== service.expected_version;
+    (check?.actual_version == null ||
+      check.actual_version !== service.expected_version);
 
   return (
     <button
@@ -124,7 +124,15 @@ function ServiceRow({ service, isSelected, onClick }: ServiceRowProps) {
       {/* Status */}
       <span className="w-24 flex-shrink-0">
         {check ? (
-          <StatusBadge status={check.status} />
+          <span className="inline-flex items-center gap-1.5">
+            <StatusBadge status={check.status} />
+            {hasDrift && (
+              <AlertTriangle
+                size={13}
+                className="text-amber-400 flex-shrink-0"
+              />
+            )}
+          </span>
         ) : (
           <span className="text-xs text-slate-500">No data</span>
         )}
