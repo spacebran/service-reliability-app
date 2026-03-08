@@ -117,7 +117,8 @@ jobs:
             POSTGRES_USER,
             POSTGRES_PASSWORD,
             POSTGRES_DB,
-            SECRET_KEY
+            SECRET_KEY,
+            ANTHROPIC_API_KEY
           script: |
             set -e
             cd ~/service-reliability-app
