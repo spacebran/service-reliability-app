@@ -73,6 +73,12 @@ async def check_service(service_id: int) -> None:
         db.add(health_check)
         await db.commit()
         logger.info("Checked %s → %s (%sms)", service.name, status.value, latency_ms)
+        if status == HealthStatus.down:
+            logger.warning(
+                "ALERT: %s is DOWN — %s",
+                service.name,
+                error_message or f"HTTP {status_code}",
+            )
 
 
 def schedule_service(service: Service) -> None:
