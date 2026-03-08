@@ -177,3 +177,11 @@ All generated code was reviewed and understood by myself before use, and modifie
 ## Outcome
 
 All requirements in spec were implemented, but I was not able to implement the AI-generated summary on my EC2 deployment. However, it works **locally** but ran out of time to debug the bug in prod.
+
+Addendum for clarification (added this after time limit was up, please feel free to disregard):
+The AI-generated incident summary feature is fully implemented and functional locally. 
+The production deployment encountered an env variable injection issue (of my Anthropic API key) that could not be resolved within the assessment time limit. 
+The feature and its integration with the Anthropic API can be verified by running the app locally, if you have an Anthropic API key of your own.
+
+<img width="2557" height="1305" alt="image" src="https://github.com/user-attachments/assets/fc4a4545-ce06-486d-804a-a8a9ac4fcb99" />
+
