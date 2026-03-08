@@ -7,6 +7,7 @@ import ServiceDetail from "./ServiceDetail";
 import ServiceFormModal from "./ServiceFormModal";
 import ServiceList from "./ServiceList";
 import SummaryCards from "./SummaryCards";
+import AiSummary from "./AiSummary";
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
@@ -61,7 +62,9 @@ export default function Dashboard() {
           </h1>
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-xs text-slate-500 font-medium">{user?.username}</span>
+          <span className="text-xs text-slate-500 font-medium">
+            {user?.username}
+          </span>
           <button
             onClick={handleLogout}
             className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-red-400 transition-colors"
@@ -77,6 +80,7 @@ export default function Dashboard() {
         {/* Main panel */}
         <main className="flex-1 overflow-y-auto p-6 space-y-5 min-w-0">
           <SummaryCards />
+          <AiSummary />
           <ServiceList
             selectedId={selectedService?.id ?? null}
             onSelect={setSelectedService}

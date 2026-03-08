@@ -29,17 +29,29 @@ export const getServices = (): Promise<Service[]> =>
 export const createService = (data: ServiceCreate): Promise<Service> =>
   api.post<Service>("/services", data).then((r) => r.data);
 
-export const updateService = (id: number, data: ServiceUpdate): Promise<Service> =>
+export const updateService = (
+  id: number,
+  data: ServiceUpdate,
+): Promise<Service> =>
   api.put<Service>(`/services/${id}`, data).then((r) => r.data);
 
 export const deleteService = (id: number): Promise<void> =>
   api.delete(`/services/${id}`).then(() => undefined);
 
-export const getServiceHistory = (id: number, limit = 100): Promise<HealthCheck[]> =>
-  api.get<HealthCheck[]>(`/services/${id}/history`, { params: { limit } }).then((r) => r.data);
+export const getServiceHistory = (
+  id: number,
+  limit = 100,
+): Promise<HealthCheck[]> =>
+  api
+    .get<HealthCheck[]>(`/services/${id}/history`, { params: { limit } })
+    .then((r) => r.data);
 
 // Dashboard
 export const getDashboardSummary = (): Promise<DashboardSummary> =>
   api.get<DashboardSummary>("/dashboard/summary").then((r) => r.data);
+
+// AI Summary
+export const getAiSummary = (): Promise<{ summary: string }> =>
+  api.get<{ summary: string }>("/dashboard/ai-summary").then((r) => r.data);
 
 export default api;
