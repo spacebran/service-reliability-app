@@ -20,6 +20,7 @@ services:
       DATABASE_URL: ${DATABASE_URL}
       SECRET_KEY: ${SECRET_KEY}
       ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-60}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
     depends_on:
       db:
         condition: service_healthy

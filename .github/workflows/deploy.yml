@@ -135,6 +135,7 @@ jobs:
             POSTGRES_DB=${{ secrets.POSTGRES_DB }}
             DATABASE_URL=postgresql+asyncpg://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@db:5432/${{ secrets.POSTGRES_DB }}
             SECRET_KEY=${{ secrets.SECRET_KEY }}
+            ANTHROPIC_API_KEY=${{ secrets.ANTHROPIC_API_KEY }}
             EOF
 
             docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --remove-orphans
