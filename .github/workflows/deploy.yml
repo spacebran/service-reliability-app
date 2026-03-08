@@ -123,26 +123,18 @@ jobs:
             set -e
             cd ~/service-reliability-app
 
-            # Pull updated images
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/service-reliability-backend:${{ needs.build.outputs.image_tag }}
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/service-reliability-frontend:${{ needs.build.outputs.image_tag }}
 
-            # Write env file for compose (avoids shell escaping issues with special chars)
-            cat > .env.prod <<EOF
-DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
-IMAGE_TAG=${{ needs.build.outputs.image_tag }}
-POSTGRES_USER=${{ secrets.POSTGRES_USER }}
-POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
-POSTGRES_DB=${{ secrets.POSTGRES_DB }}
-DATABASE_URL=postgresql+asyncpg://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@db:5432/${{ secrets.POSTGRES_DB }}
-SECRET_KEY=${{ secrets.SECRET_KEY }}
-ANTHROPIC_API_KEY=${{ secrets.ANTHROPIC_API_KEY }}
-EOF
+            echo "DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}" > .env.prod
+            echo "IMAGE_TAG=${{ needs.build.outputs.image_tag }}" >> .env.prod
+            echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env.prod
+            echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env.prod
+            echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> .env.prod
+            echo "DATABASE_URL=postgresql+asyncpg://${{ secrets.POSTGRES_USER }}:${{ secrets.POSTGRES_PASSWORD }}@db:5432/${{ secrets.POSTGRES_DB }}" >> .env.prod
+            echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env.prod
+            echo "ANTHROPIC_API_KEY=${{ secrets.ANTHROPIC_API_KEY }}" >> .env.prod
 
             docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --remove-orphans
-
-            # Remove env file immediately after use
             rm -f .env.prod
-
-            # Clean up dangling images
             docker image prune -f
