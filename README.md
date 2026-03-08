@@ -1,22 +1,21 @@
 # Service Reliability Dashboard
 
-A full-stack service reliability monitoring application. Periodically polls configured HTTP endpoints, tracks health status and latency, detects version drift, and exposes results through an authenticated dashboard.
-
-Built as a take-home assessment using Anthropic's stack: React + TypeScript frontend, FastAPI backend, PostgreSQL database, containerised with Docker, deployed to AWS EC2 via GitHub Actions CI/CD.
+A full-stack service reliability monitoring application.
+Periodically calls configured HTTP endpoints, tracks health status and latency, detects version drift, and exposes results through a simple dashboard with auth.
 
 ---
 
 ## Tech Stack
 
-| Layer      | Technology                                                           |
-| ---------- | -------------------------------------------------------------------- |
-| Frontend   | React 18, TypeScript, Vite, Tailwind CSS, TanStack Query, Recharts   |
-| Backend    | Python 3.12, FastAPI, SQLAlchemy 2 (async), Pydantic v2, APScheduler |
-| Database   | PostgreSQL 16                                                        |
-| Migrations | Alembic                                                              |
-| Testing    | pytest + pytest-asyncio (backend)                                    |
-| CI/CD      | GitHub Actions                                                       |
-| Deployment | AWS EC2, Docker, Docker Compose                                      |
+| Layer      | Technology                                                                   |
+| ---------- | ---------------------------------------------------------------------------- |
+| Frontend   | React 18, TypeScript, Vite, Tailwind CSS, TanStack Query, Recharts           |
+| Backend    | Python 3.12, FastAPI, SQLAlchemy 2 (async), Pydantic v2, APScheduler         |
+| Database   | PostgreSQL 16                                                                |
+| Migrations | Alembic                                                                      |
+| Testing    | pytest + pytest-asyncio (backend), @testing-library/react, vitest (frontend) |
+| CI/CD      | GitHub Actions                                                               |
+| Deployment | AWS EC2, Docker, Docker Compose                                              |
 
 ---
 
@@ -123,6 +122,13 @@ cd backend
 uv run pytest tests/ -v
 ```
 
+### Frontend
+
+```bash
+cd frontend
+npm test
+```
+
 ---
 
 ## Deployment
@@ -167,3 +173,7 @@ This project was built with assistance from Claude:
 - **Debugging**: Debugging of asyncpg SSL connection failures, bcrypt/passlib compatibility issues, pytest event loop conflicts.
 
 All generated code was reviewed and understood by myself before use, and modified where appropriate. I used AI as a very capable pair programmer and collaborator.
+
+## Outcome
+
+All requirements in spec were implemented, but I was not able to implement the AI-generated summary on my EC2 deployment. However, it works **locally** but ran out of time to debug the bug in prod.
