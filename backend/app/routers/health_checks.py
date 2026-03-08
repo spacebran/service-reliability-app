@@ -8,6 +8,10 @@ from app.models.service import Service
 from app.models.user import User
 from app.routers.auth import get_current_user
 
+import os
+import httpx
+from datetime import datetime, timezone, timedelta
+
 router = APIRouter()
 
 
@@ -36,8 +40,9 @@ async def dashboard_summary(
         status_counts[s.value] += 1
 
     env_result = await db.execute(
-        select(Service.environment, func.count().label("count"))
-        .group_by(Service.environment)
+        select(Service.environment, func.count().label("count")).group_by(
+            Service.environment
+        )
     )
     by_environment = {row.environment: row.count for row in env_result}
 
@@ -46,3 +51,72 @@ async def dashboard_summary(
         "by_status": status_counts,
         "by_environment": by_environment,
     }
+
+
+@router.get("/dashboard/ai-summary")
+async def get_ai_summary(
+    db: AsyncSession = Depends(get_db),
+    _: User = Depends(get_current_user),
+):
+    # Fetch incidents from last 24 hours
+    since = datetime.now(timezone.utc) - timedelta(hours=24)
+    result = await db.execute(
+        select(HealthCheck)
+        .where(HealthCheck.status != HealthStatus.healthy)
+        .where(HealthCheck.checked_at >= since)
+        .order_by(HealthCheck.checked_at.desc())
+        .limit(50)
+    )
+    incidents = result.scalars().all()
+
+    # Fetch service names
+    service_ids = list({i.service_id for i in incidents})
+    services_result = await db.execute(
+        select(Service).where(Service.id.in_(service_ids))
+    )
+    services_map = {s.id: s.name for s in services_result.scalars().all()}
+
+    if not incidents:
+        return {
+            "summary": "All services have been healthy in the last 24 hours. No incidents to report."
+        }
+
+    # Build incident description for the prompt
+    lines = []
+    for inc in incidents:
+        name = services_map.get(inc.service_id, f"Service {inc.service_id}")
+        ts = inc.checked_at.strftime("%H:%M UTC")
+        latency = f"{inc.latency_ms}ms" if inc.latency_ms else "N/A"
+        err = f" — {inc.error_message}" if inc.error_message else ""
+        lines.append(f"- {name}: {inc.status.value} at {ts}, latency {latency}{err}")
+
+    incident_text = "\n".join(lines)
+
+    prompt = f"""You are a site reliability engineer summarizing recent incidents.
+Here are the non-healthy service checks from the last 24 hours:
+
+{incident_text}
+
+Write a concise 2-3 sentence incident summary for a dashboard. 
+Mention which services were affected, the nature of the issues, and any patterns.
+Be factual and professional. Do not use bullet points."""
+
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            "https://api.anthropic.com/v1/messages",
+            headers={
+                "x-api-key": os.environ.get("ANTHROPIC_API_KEY", ""),
+                "anthropic-version": "2023-06-01",
+                "content-type": "application/json",
+            },
+            json={
+                "model": "claude-haiku-4-5",
+                "max_tokens": 256,
+                "messages": [{"role": "user", "content": prompt}],
+            },
+            timeout=30.0,
+        )
+        data = response.json()
+        summary = data["content"][0]["text"]
+
+    return {"summary": summary}
