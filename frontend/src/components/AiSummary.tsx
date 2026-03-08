@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getAiSummary } from "../api";
 
 export default function AiSummary() {
-  const { data, isLoading, refetch } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["ai-summary"],
     queryFn: getAiSummary,
     staleTime: 300_000,
@@ -23,6 +23,10 @@ export default function AiSummary() {
       </div>
       {isLoading ? (
         <div className="h-4 bg-slate-700 rounded animate-pulse w-3/4" />
+      ) : isError ? (
+        <p className="text-sm text-slate-500 italic">
+          Unable to generate summary.
+        </p>
       ) : (
         <p className="text-sm text-slate-300 leading-relaxed">
           {data?.summary ?? "No summary available."}
