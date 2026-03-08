@@ -1,34 +1,108 @@
 import { LogOut } from "lucide-react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import type { Service } from "../types";
+import ServiceDetail from "./ServiceDetail";
+import ServiceFormModal from "./ServiceFormModal";
+import ServiceList from "./ServiceList";
+import SummaryCards from "./SummaryCards";
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingService, setEditingService] = useState<Service | null>(null);
 
   const handleLogout = async () => {
     await logout();
     navigate("/login");
   };
 
+  const openAddModal = () => {
+    setEditingService(null);
+    setIsModalOpen(true);
+  };
+
+  const openEditModal = (service: Service) => {
+    setEditingService(service);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setEditingService(null);
+  };
+
+  const handleSaved = (saved: Service) => {
+    // If we just edited the currently-selected service, sync its data
+    if (selectedService && saved.id === selectedService.id) {
+      setSelectedService(saved);
+    }
+    closeModal();
+  };
+
+  const handleDeleted = () => {
+    setSelectedService(null);
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-        <h1 className="text-xl font-bold text-gray-900">Service Reliability Dashboard</h1>
+    <div className="min-h-screen bg-[#0f1117] flex flex-col text-white">
+      {/* Top bar */}
+      <header className="bg-slate-900 border-b border-slate-800 px-6 py-3.5 flex items-center justify-between flex-shrink-0 z-10">
+        <div className="flex items-center gap-3">
+          <div className="w-6 h-6 rounded bg-blue-600 flex items-center justify-center">
+            <span className="text-white text-xs font-bold">SR</span>
+          </div>
+          <h1 className="text-sm font-semibold text-white tracking-tight">
+            Service Reliability Dashboard
+          </h1>
+        </div>
         <div className="flex items-center gap-4">
-          <span className="text-sm text-gray-500">{user?.username}</span>
+          <span className="text-xs text-slate-500 font-medium">{user?.username}</span>
           <button
             onClick={handleLogout}
-            className="flex items-center gap-1 text-sm text-gray-600 hover:text-red-600 transition-colors"
+            className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-red-400 transition-colors"
           >
-            <LogOut size={16} />
+            <LogOut size={13} />
             Logout
           </button>
         </div>
       </header>
-      <main className="p-6">
-        <p className="text-gray-500 text-center mt-16 text-lg">Dashboard coming soon</p>
-      </main>
+
+      {/* Content */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Main panel */}
+        <main className="flex-1 overflow-y-auto p-6 space-y-5 min-w-0">
+          <SummaryCards />
+          <ServiceList
+            selectedId={selectedService?.id ?? null}
+            onSelect={setSelectedService}
+            onAdd={openAddModal}
+          />
+        </main>
+
+        {/* Detail side panel */}
+        {selectedService && (
+          <ServiceDetail
+            service={selectedService}
+            onEdit={openEditModal}
+            onDelete={handleDeleted}
+            onClose={() => setSelectedService(null)}
+          />
+        )}
+      </div>
+
+      {/* Add / Edit modal */}
+      {isModalOpen && (
+        <ServiceFormModal
+          service={editingService}
+          onClose={closeModal}
+          onSaved={handleSaved}
+        />
+      )}
     </div>
   );
 }
