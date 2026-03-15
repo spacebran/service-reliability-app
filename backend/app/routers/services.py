@@ -73,6 +73,8 @@ async def update_service(
         setattr(service, field, value)
     await db.commit()
     await db.refresh(service)
+    if service.is_active:
+        schedule_service(service)
     return await _attach_latest_check(service, db)
 
 
