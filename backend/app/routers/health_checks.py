@@ -32,7 +32,9 @@ async def dashboard_summary(
         .scalar_subquery()
     )
     latest_checks_result = await db.execute(
-        select(HealthCheck.status).where(HealthCheck.id == latest_id_subq)
+        select(HealthCheck.status)
+        .select_from(Service)
+        .join(HealthCheck, HealthCheck.id == latest_id_subq)
     )
     statuses = latest_checks_result.scalars().all()
 
