@@ -109,6 +109,7 @@ function ServiceRow({ service, isSelected, onClick }: ServiceRowProps) {
       className={`w-full flex items-center gap-4 px-5 py-3.5 border-b border-slate-800 text-left
         hover:bg-slate-800/50 transition-colors group cursor-pointer
         ${isSelected ? "bg-slate-800/70 border-l-2 border-l-blue-500 pl-[18px]" : ""}
+        ${!service.is_active ? "opacity-40" : ""}
       `}
     >
       {/* Name */}
