@@ -193,7 +193,7 @@ export default function ServiceList({
   onSelect,
   onAdd,
 }: ServiceListProps) {
-  const { data: services, isLoading } = useQuery({
+  const { data: services = [], isLoading } = useQuery({
     queryKey: ["services"],
     queryFn: getServices,
     refetchInterval: 30_000,
@@ -245,11 +245,11 @@ export default function ServiceList({
             <SkeletonRow key={i} />
           ))}
         </div>
-      ) : (services?.length ?? 0) === 0 ? (
+      ) : services.length === 0 ? (
         <EmptyState onAdd={onAdd} />
       ) : (
         <div>
-          {services!.map((service) => (
+          {services.map((service) => (
             <ServiceRow
               key={service.id}
               service={service}

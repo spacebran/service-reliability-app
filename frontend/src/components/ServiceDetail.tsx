@@ -122,7 +122,7 @@ export default function ServiceDetail({
   const queryClient = useQueryClient();
   const [confirmDelete, setConfirmDelete] = useState(false);
 
-  const { data: history, isLoading } = useQuery({
+  const { data: history = [], isLoading } = useQuery({
     queryKey: ["service-history", service.id],
     queryFn: () => getServiceHistory(service.id, 50),
     refetchInterval: 30_000,
@@ -139,13 +139,11 @@ export default function ServiceDetail({
   });
 
   // Chart data: oldest-first, map to {latency, checked_at, status}
-  const chartData: ChartPoint[] = history
-    ? [...history].reverse().map((h) => ({
-        latency: h.latency_ms,
-        checked_at: h.checked_at,
-        status: h.status,
-      }))
-    : [];
+  const chartData: ChartPoint[] = [...history].reverse().map((h) => ({
+    latency: h.latency_ms,
+    checked_at: h.checked_at,
+    status: h.status,
+  }));
 
   const check = service.latest_check;
   const hasDrift =
@@ -320,7 +318,7 @@ export default function ServiceDetail({
                   Recent checks
                 </p>
               </div>
-              {history && history.length > 0 ? (
+              {history.length > 0 ? (
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-slate-800">
