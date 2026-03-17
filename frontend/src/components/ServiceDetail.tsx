@@ -8,7 +8,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Line,
   LineChart,
@@ -121,6 +121,10 @@ export default function ServiceDetail({
 }: Props) {
   const queryClient = useQueryClient();
   const [confirmDelete, setConfirmDelete] = useState(false);
+
+  useEffect(() => {
+    setConfirmDelete(false);
+  }, [service.id]);
 
   const { data: history = [], isLoading } = useQuery({
     queryKey: ["service-history", service.id],
