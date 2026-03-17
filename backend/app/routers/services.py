@@ -41,9 +41,27 @@ async def list_services(
     db: AsyncSession = Depends(get_db),
     _: User = Depends(get_current_user),
 ):
-    result = await db.execute(select(Service).order_by(Service.name))
-    services = result.scalars().all()
-    return [await _attach_latest_check(s, db) for s in services]
+    latest_subq = (
+        select(func.max(HealthCheck.id).label("max_id"))
+        .group_by(HealthCheck.service_id)
+        .subquery()
+    )
+    result = await db.execute(
+        select(Service, HealthCheck)
+        .outerjoin(latest_subq, latest_subq.c.max_id == HealthCheck.id)
+        .outerjoin(HealthCheck, HealthCheck.id == latest_subq.c.max_id)
+        .order_by(Service.name)
+    )
+    rows = result.unique().all()
+
+    responses = []
+    for row in rows:
+        service, health_check = row
+        response = ServiceResponse.model_validate(service)
+        if health_check:
+            response.latest_check = HealthCheckResponse.model_validate(health_check)
+        responses.append(response)
+    return responses
 
 
 @router.post("", response_model=ServiceResponse, status_code=201)
