@@ -13,7 +13,16 @@ const api = axios.create({
   withCredentials: true,
 });
 
-api.interceptors.response.use((response) => response.data);
+// Intercept 401 on token expiry, clear auth state, fire event to tell AuthContext.tsx to redirect to login
+api.interceptors.response.use(
+  (response) => response.data,
+  (error) => {
+    if (error.response?.status === 401) {
+      window.dispatchEvent(new Event("auth:expired"));
+    }
+    return Promise.reject(error);
+  },
+);
 
 // Auth
 export const login = (username: string, password: string): Promise<void> =>
