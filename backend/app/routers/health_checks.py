@@ -37,6 +37,7 @@ async def dashboard_summary(
     latest_checks_result = await db.execute(
         select(HealthCheck.status)
         .select_from(Service)
+        .where(Service.is_active)
         .join(latest_checks_subquery, latest_checks_subquery.c.service_id == Service.id)
         .join(HealthCheck, HealthCheck.id == latest_checks_subquery.c.max_id)
     )  # Inner join as we disregard services with no health checks
@@ -48,10 +49,11 @@ async def dashboard_summary(
         status_counts[s.value] += 1
 
     env_result = await db.execute(
-        select(Service.environment, func.count().label("count")).group_by(
-            Service.environment
-        )
+        select(Service.environment, func.count().label("count"))
+        .where(Service.is_active)
+        .group_by(Service.environment)
     )
+
     by_environment = {row.environment: row.count for row in env_result}
 
     return {
