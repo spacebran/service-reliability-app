@@ -24,18 +24,23 @@ async def dashboard_summary(
     total_result = await db.execute(select(func.count()).select_from(Service))
     total_services = total_result.scalar_one()
 
-    # Latest check per service via subquery
-    latest_id_subq = (
-        select(func.max(HealthCheck.id))
-        .where(HealthCheck.service_id == Service.id)
-        .correlate(Service)
-        .scalar_subquery()
+    # Latest health check per service, grouped by service_id
+    latest_checks_subquery = (
+        select(
+            func.max(HealthCheck.id).label("max_id"),
+            HealthCheck.service_id.label("service_id"),
+        )
+        .group_by(HealthCheck.service_id)
+        .subquery()
     )
+
     latest_checks_result = await db.execute(
         select(HealthCheck.status)
         .select_from(Service)
-        .join(HealthCheck, HealthCheck.id == latest_id_subq)
-    )
+        .join(latest_checks_subquery, latest_checks_subquery.c.service_id == Service.id)
+        .join(HealthCheck, HealthCheck.id == latest_checks_subquery.c.max_id)
+    )  # Inner join as we disregard services with no health checks
+
     statuses = latest_checks_result.scalars().all()
 
     status_counts = {s.value: 0 for s in HealthStatus}

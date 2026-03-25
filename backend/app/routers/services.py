@@ -23,12 +23,12 @@ async def _get_service_or_404(service_id: int, db: AsyncSession) -> Service:
 
 
 async def _attach_latest_check(service: Service, db: AsyncSession) -> ServiceResponse:
-    subq = (
+    subquery = (
         select(func.max(HealthCheck.id))
         .where(HealthCheck.service_id == service.id)
         .scalar_subquery()
     )
-    result = await db.execute(select(HealthCheck).where(HealthCheck.id == subq))
+    result = await db.execute(select(HealthCheck).where(HealthCheck.id == subquery))
     latest = result.scalar_one_or_none()
     response = ServiceResponse.model_validate(service)
     if latest:
@@ -41,17 +41,39 @@ async def list_services(
     db: AsyncSession = Depends(get_db),
     _: User = Depends(get_current_user),
 ):
-    latest_subq = (
-        select(func.max(HealthCheck.id).label("max_id"))
+    # Latest health check per service, grouped by service_id
+    latest_checks_subquery = (
+        select(
+            func.max(HealthCheck.id).label("max_id"),
+            HealthCheck.service_id.label("service_id"),
+        )
         .group_by(HealthCheck.service_id)
         .subquery()
     )
+
     result = await db.execute(
         select(Service, HealthCheck)
-        .outerjoin(latest_subq, latest_subq.c.max_id == HealthCheck.id)
-        .outerjoin(HealthCheck, HealthCheck.id == latest_subq.c.max_id)
+        .select_from(Service)
+        .outerjoin(
+            latest_checks_subquery, Service.id == latest_checks_subquery.c.service_id
+        )  # Left outer join services table with subquery
+        .outerjoin(
+            HealthCheck, HealthCheck.id == latest_checks_subquery.c.max_id
+        )  # Left outer join services with health checks
         .order_by(Service.name)
     )
+
+    # Full SQL. We do two left outer joins to preserve services with no health checks >>>
+    # SELECT services.*, health_checks.*
+    # FROM services
+    # LEFT OUTER JOIN (
+    #     SELECT MAX(id) AS max_id, service_id
+    #     FROM health_checks
+    #     GROUP BY service_id
+    # ) AS subq ON services.id = subq.service_id
+    # LEFT OUTER JOIN health_checks ON health_checks.id = subq.max_id
+    # ORDER BY services.name
+
     rows = result.unique().all()
 
     responses = []
