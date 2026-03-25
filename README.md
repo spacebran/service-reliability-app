@@ -96,6 +96,8 @@ Frontend: http://localhost:5173 · Backend API docs: http://localhost:8000/docs
 
 ### 4. Seed admin user
 
+This will seed a user on your local database with credentials: `admin / Password@123`
+
 ```bash
 cd backend
 uv run python -c "
@@ -116,6 +118,14 @@ asyncio.run(seed())
 ---
 
 ## Running Tests
+
+### Backend
+
+Create the test database (one-time setup) while Docker Desktop is running.
+
+```bash
+docker exec -it service-reliability-app-db-1 psql -U tracker -c "CREATE DATABASE service_reliability_test;"
+```
 
 ```bash
 cd backend
@@ -139,7 +149,7 @@ Deployed to AWS EC2 via GitHub Actions on every push to `main`. The pipeline has
 - Builds Docker images, pushes to Docker Hub
 - Deploy to EC2 instance via SSH
 
-Live demo: **http://18.221.156.118** · Credentials: `admin / Password@123`
+Live demo: **http://3.142.232.149/login** · Credentials: `admin / Password@123`
 
 ## Infrastructure & Production Monitoring
 
@@ -179,9 +189,8 @@ All generated code was reviewed and understood by myself before use, and modifie
 All requirements in spec were implemented, but I was not able to implement the AI-generated summary on my EC2 deployment. However, it works **locally** but ran out of time to debug the bug in prod.
 
 Addendum for clarification (added this after time limit was up, please feel free to disregard):
-The AI-generated incident summary feature is fully implemented and functional locally. 
-The production deployment encountered an env variable injection issue (of my Anthropic API key) that could not be resolved within the assessment time limit. 
+The AI-generated incident summary feature is fully implemented and functional locally.
+The production deployment encountered an env variable injection issue (of my Anthropic API key) that could not be resolved within the assessment time limit.
 The feature and its integration with the Anthropic API can be verified by running the app locally, if you have an Anthropic API key of your own.
 
 <img width="2557" height="1305" alt="image" src="https://github.com/user-attachments/assets/fc4a4545-ce06-486d-804a-a8a9ac4fcb99" />
-
