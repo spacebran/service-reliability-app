@@ -79,17 +79,17 @@ async def get_ai_summary(
     )
     incidents = result.scalars().all()
 
+    if not incidents:
+        return {
+            "summary": "All services have been healthy in the last 24 hours. No incidents to report."
+        }
+
     # Fetch service names
     service_ids = list({i.service_id for i in incidents})
     services_result = await db.execute(
         select(Service).where(Service.id.in_(service_ids))
     )
     services_map = {s.id: s.name for s in services_result.scalars().all()}
-
-    if not incidents:
-        return {
-            "summary": "All services have been healthy in the last 24 hours. No incidents to report."
-        }
 
     # Build incident description for the prompt
     lines = []
