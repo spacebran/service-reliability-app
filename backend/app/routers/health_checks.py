@@ -85,7 +85,7 @@ async def get_ai_summary(
         }
 
     # Fetch service names
-    service_ids = list({i.service_id for i in incidents})
+    service_ids = list({inc.service_id for inc in incidents})
     services_result = await db.execute(
         select(Service).where(Service.id.in_(service_ids))
     )
@@ -95,10 +95,12 @@ async def get_ai_summary(
     lines = []
     for inc in incidents:
         name = services_map.get(inc.service_id, f"Service {inc.service_id}")
-        ts = inc.checked_at.strftime("%H:%M UTC")
+        timestamp = inc.checked_at.strftime("%H:%M UTC")
         latency = f"{inc.latency_ms}ms" if inc.latency_ms else "N/A"
         err = f" — {inc.error_message}" if inc.error_message else ""
-        lines.append(f"- {name}: {inc.status.value} at {ts}, latency {latency}{err}")
+        lines.append(
+            f"- {name}: {inc.status.value} at {timestamp}, latency {latency}{err}"
+        )
 
     incident_text = "\n".join(lines)
 
