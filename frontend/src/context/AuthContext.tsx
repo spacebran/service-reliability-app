@@ -8,6 +8,7 @@ import React, {
 import { useNavigate } from "react-router-dom";
 import { getMe, login as apiLogin, logout as apiLogout } from "../api";
 import type { User } from "../types";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface AuthContextValue {
   user: User | null;
@@ -22,6 +23,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     getMe()
@@ -46,9 +48,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const logout = useCallback(async () => {
-    await apiLogout();
-    setUser(null);
-  }, []);
+    try {
+      await apiLogout();
+    } finally {
+      setUser(null);
+      queryClient.clear();
+    }
+  }, [queryClient]);
 
   return (
     <AuthContext.Provider value={{ user, loading, login, logout }}>
